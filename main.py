@@ -64,7 +64,7 @@ def ejecutar_pruebas():
     # Operación 6: reserva exitosa de una sala.
     try:
         reserva1 = Reserva("R001", cliente1, sala, 2, personas=8)
-        costo = reserva1.procesar(impuesto=0.19, descuento=0.10)
+        costo = reserva1.confirmar(impuesto=0.19, descuento=0.10)
         reservas.append(reserva1)
         print(f"\n6. Reserva exitosa: {reserva1.obtener_informacion()}")
     except Exception as error:
@@ -84,7 +84,7 @@ def ejecutar_pruebas():
     # Operación 8: reserva exitosa de varios equipos.
     try:
         reserva3 = Reserva("R003", cliente1, equipo, 3, cantidad=2)
-        reserva3.procesar(impuesto=0.19)
+        reserva3.confirmar(impuesto=0.19)
         reservas.append(reserva3)
         print("\n8. Reserva de equipos:", reserva3.obtener_informacion())
     except Exception as error:
@@ -94,7 +94,7 @@ def ejecutar_pruebas():
     # Operación 9: reserva exitosa de asesoría virtual.
     try:
         reserva4 = Reserva("R004", cliente1, asesoria, 1.5, modalidad="virtual")
-        reserva4.procesar(descuento=0.05)
+        reserva4.confirmar(descuento=0.05)
         reservas.append(reserva4)
         print("\n9. Reserva de asesoría:", reserva4.obtener_informacion())
     except Exception as error:
