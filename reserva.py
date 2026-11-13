@@ -38,7 +38,9 @@ class Reserva:
             return self.costo
         finally:
             registrar_evento(f"Finalizó el intento de procesamiento de la reserva {self.identificador}.")
-
+    def confirmar(self, impuesto=0.0, descuento=0.0):
+        """Confirma una reserva mediante su procesamiento."""
+        return self.procesar(impuesto, descuento)
     def cancelar(self):
         """Cancela una reserva que todavía no haya sido cancelada."""
         try:
