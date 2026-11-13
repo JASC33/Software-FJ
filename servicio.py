@@ -1,10 +1,10 @@
 """Clase abstracta Servicio y servicios especializados."""
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from entidad import Entidad
 from excepciones import DatoInvalidoError, ServicioNoDisponibleError
 
-class Servicio(Entidad):
+class Servicio(Entidad, ABC):
     """Clase base para los servicios ofrecidos por Software FJ."""
 
     def __init__(self, identificador, nombre, tarifa_hora, disponible=True):
