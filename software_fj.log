@@ -1,0 +1,61 @@
+2026-11-12 21:46:34,725 - ERROR - Operación 2: datos de cliente inválidos
+Traceback (most recent call last):
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\main.py", line 31, in ejecutar_pruebas
+    Cliente("C002", "María López", "correo-no-valido", "3101234567")
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\cliente.py", line 13, in __init__
+    self.correo = correo
+    ^^^^^^^^^^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\cliente.py", line 33, in correo
+    raise DatoInvalidoError("El correo electrónico no tiene un formato válido.")
+excepciones.DatoInvalidoError: El correo electrónico no tiene un formato válido.
+2026-11-12 21:46:34,798 - ERROR - Operación 4: servicio con tarifa inválida
+Traceback (most recent call last):
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\main.py", line 48, in ejecutar_pruebas
+    AlquilerEquipo("E001", -1000, "Computador")
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\servicio.py", line 78, in __init__
+    super().__init__(identificador, "Alquiler de equipos", tarifa_hora, disponible)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\servicio.py", line 15, in __init__
+    raise DatoInvalidoError("La tarifa por hora debe ser mayor que cero.")
+excepciones.DatoInvalidoError: La tarifa por hora debe ser mayor que cero.
+2026-11-12 21:46:34,816 - INFO - Reserva R001 creada en estado pendiente.
+2026-11-12 21:46:34,816 - INFO - Reserva R001 confirmada por $107,100.00.
+2026-11-12 21:46:34,816 - INFO - Finalizó el intento de procesamiento de la reserva R001.
+2026-11-12 21:46:34,825 - INFO - Reserva R002 creada en estado pendiente.
+2026-11-12 21:46:34,826 - ERROR - Error al procesar la reserva R002: La cantidad de personas supera la capacidad o no es válida.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\reserva.py", line 28, in procesar
+    self.servicio.validar_parametros(**self.parametros)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\servicio.py", line 70, in validar_parametros
+    raise DatoInvalidoError("La cantidad de personas supera la capacidad o no es válida.")
+excepciones.DatoInvalidoError: La cantidad de personas supera la capacidad o no es válida.
+2026-11-12 21:46:34,831 - INFO - Finalizó el intento de procesamiento de la reserva R002.
+2026-11-12 21:46:34,835 - ERROR - Operación 7: cantidad de personas no válida
+Traceback (most recent call last):
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\reserva.py", line 28, in procesar
+    self.servicio.validar_parametros(**self.parametros)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\servicio.py", line 70, in validar_parametros
+    raise DatoInvalidoError("La cantidad de personas supera la capacidad o no es válida.")
+excepciones.DatoInvalidoError: La cantidad de personas supera la capacidad o no es válida.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\main.py", line 77, in ejecutar_pruebas
+    reserva2.procesar()
+    ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\ASUS\Desktop\UNAD ANDRES SANCHEZ\PROGRAMACIÓN\Software_FJ\reserva.py", line 34, in procesar
+    raise ReservaInvalidaError("No fue posible procesar la reserva.") from error
+excepciones.ReservaInvalidaError: No fue posible procesar la reserva.
+2026-11-12 21:46:34,838 - INFO - Reserva R003 creada en estado pendiente.
+2026-11-12 21:46:34,838 - INFO - Reserva R003 confirmada por $142,800.00.
+2026-11-12 21:46:34,838 - INFO - Finalizó el intento de procesamiento de la reserva R003.
+2026-11-12 21:46:34,851 - INFO - Reserva R004 creada en estado pendiente.
+2026-11-12 21:46:34,853 - INFO - Reserva R004 confirmada por $114,000.00.
+2026-11-12 21:46:34,853 - INFO - Finalizó el intento de procesamiento de la reserva R004.
+2026-11-12 21:46:34,860 - INFO - Reserva R001 cancelada.
+2026-11-12 21:46:34,886 - INFO - Finalizó la ejecución de las diez operaciones de prueba.
