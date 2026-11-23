@@ -1,0 +1,768 @@
+"""Interfaz gráfica del sistema Software FJ."""
+
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+from cliente import Cliente
+from servicio import ReservaSala, AlquilerEquipo, AsesoriaEspecializada
+from reserva import Reserva
+from excepciones import ErrorSistema
+from logs import registrar_evento, registrar_error
+
+
+class AplicacionSoftwareFJ:
+
+    def __init__(self, ventana):
+        self.ventana = ventana
+        self.ventana.title("Software FJ - Sistema Integral de Gestión")
+        self.ventana.geometry("1050x680")
+        self.ventana.minsize(900, 600)
+        self.ventana.configure(bg="#F1F4F9")
+
+        self.clientes = []
+        self.servicios = []
+        self.reservas = []
+        self.crear_interfaz()
+        registrar_evento("Se inició Software FJ.")
+
+    def crear_interfaz(self):
+
+        menu = tk.Frame(self.ventana, bg="#172B4D", width=220)
+        menu.pack(side="left", fill="y")
+        menu.pack_propagate(False)
+
+        tk.Label(
+            menu,
+            text="SOFTWARE FJ",
+            font=("Arial", 20, "bold"),
+            bg="#172B4D",
+            fg="white"
+        ).pack(pady=30)
+
+        botones = [
+    ("Inicio", self.mostrar_inicio),
+    ("Clientes", self.mostrar_clientes),
+    ("Servicios", self.mostrar_servicios),
+    ("Reservas", self.mostrar_reservas),
+    ("Salir", self.salir)
+]
+
+        for texto, comando in botones:
+            tk.Button(
+                menu,
+                text=texto,
+                command=comando,
+                font=("Arial", 12),
+                bg="#243B61",
+                fg="white",
+                activebackground="#365985",
+                activeforeground="white",
+                relief="flat",
+                cursor="hand2"
+            ).pack(fill="x", padx=15, pady=7, ipady=10)
+
+        self.panel = tk.Frame(self.ventana, bg="#F1F4F9")
+        self.panel.pack(side="right", fill="both", expand=True)
+
+        self.mostrar_inicio()
+
+    def limpiar_panel(self):
+        for elemento in self.panel.winfo_children():
+            elemento.destroy()
+
+    def mostrar_inicio(self):
+        self.limpiar_panel()
+
+        tk.Label(
+            self.panel,
+            text="Bienvenido a Software FJ",
+            font=("Arial", 24, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=(80, 20))
+
+        tk.Label(
+            self.panel,
+            text="Sistema Integral de Gestión",
+            font=("Arial", 15),
+            bg="#F1F4F9",
+            fg="#52647A"
+        ).pack(pady=10)
+
+        tk.Label(
+            self.panel,
+            text="Administra clientes, servicios y reservas.",
+            font=("Arial", 12),
+            bg="#F1F4F9",
+            fg="#52647A"
+        ).pack(pady=15)
+
+        tk.Label(
+            self.panel,
+            text=f"Clientes registrados: {len(self.clientes)}",
+            font=("Arial", 12, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=10)
+
+        tk.Label(
+            self.panel,
+            text=f"Servicios registrados: {len(self.servicios)}",
+            font=("Arial", 12, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=5)
+
+    def mostrar_clientes(self):
+        self.limpiar_panel()
+
+        tk.Label(
+            self.panel,
+            text="Gestión de clientes",
+            font=("Arial", 22, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=20)
+
+        formulario = tk.Frame(self.panel, bg="white", padx=25, pady=20)
+        formulario.pack(fill="x", padx=30, pady=10)
+
+        self.campos = {}
+
+        datos = [
+            ("Identificación", "identificacion"),
+            ("Nombre completo", "nombre"),
+            ("Correo electrónico", "correo"),
+            ("Teléfono", "telefono")
+        ]
+
+        for fila, (etiqueta, clave) in enumerate(datos):
+            tk.Label(
+                formulario,
+                text=etiqueta,
+                bg="white",
+                font=("Arial", 10, "bold")
+            ).grid(row=fila, column=0, sticky="w", pady=8)
+
+            entrada = tk.Entry(formulario, width=35, font=("Arial", 11))
+            entrada.grid(row=fila, column=1, padx=15, pady=8)
+            self.campos[clave] = entrada
+
+        tk.Button(
+            formulario,
+            text="Registrar cliente",
+            command=self.registrar_cliente,
+            bg="#1976D2",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            relief="flat",
+            cursor="hand2",
+            padx=15,
+            pady=8
+        ).grid(row=4, column=0, columnspan=2, pady=15)
+
+        tk.Label(
+            self.panel,
+            text="Clientes registrados",
+            font=("Arial", 15, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=10)
+
+        columnas = ("identificacion", "nombre", "correo", "telefono")
+
+        self.tabla = ttk.Treeview(
+            self.panel,
+            columns=columnas,
+            show="headings",
+            height=8
+        )
+
+        encabezados = [
+            ("identificacion", "Identificación"),
+            ("nombre", "Nombre"),
+            ("correo", "Correo"),
+            ("telefono", "Teléfono")
+        ]
+
+        for columna, titulo in encabezados:
+            self.tabla.heading(columna, text=titulo)
+            self.tabla.column(columna, width=140)
+
+        self.tabla.pack(fill="both", expand=True, padx=30, pady=10)
+
+        for cliente in self.clientes:
+            self.tabla.insert(
+                "",
+                "end",
+                values=(
+                    cliente.identificador,
+                    cliente.nombre,
+                    cliente.correo,
+                    cliente.telefono
+                )
+            )
+
+    def registrar_cliente(self):
+        try:
+            identificacion = self.campos["identificacion"].get().strip()
+            nombre = self.campos["nombre"].get().strip()
+            correo = self.campos["correo"].get().strip()
+            telefono = self.campos["telefono"].get().strip()
+
+            if not all([identificacion, nombre, correo, telefono]):
+                messagebox.showwarning(
+                    "Datos incompletos",
+                    "Complete todos los campos."
+                )
+                return
+
+            if any(c.identificador == identificacion for c in self.clientes):
+                messagebox.showwarning(
+                    "Identificación duplicada",
+                    "Ya existe un cliente con esa identificación."
+                )
+                return
+
+            cliente = Cliente(identificacion, nombre, correo, telefono)
+            self.clientes.append(cliente)
+
+            self.tabla.insert(
+                "",
+                "end",
+                values=(
+                    cliente.identificador,
+                    cliente.nombre,
+                    cliente.correo,
+                    cliente.telefono
+                )
+            )
+
+            registrar_evento(
+                f"Cliente {cliente.identificador} registrado."
+            )
+
+            messagebox.showinfo(
+                "Registro exitoso",
+                "El cliente fue registrado correctamente."
+            )
+
+            for entrada in self.campos.values():
+                entrada.delete(0, tk.END)
+
+        except (ErrorSistema, ValueError) as error:
+            registrar_error(f"Error al registrar cliente: {error}")
+            messagebox.showerror("Error de registro", str(error))
+
+        except Exception as error:
+            registrar_error(f"Error inesperado: {error}")
+            messagebox.showerror("Error", "No fue posible registrar el cliente.")
+
+    def mostrar_servicios(self):
+        self.limpiar_panel()
+
+        tk.Label(
+            self.panel,
+            text="Gestión de servicios",
+            font=("Arial", 22, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=15)
+
+        formulario = tk.Frame(self.panel, bg="white", padx=20, pady=15)
+        formulario.pack(fill="x", padx=25, pady=10)
+
+        tk.Label(
+            formulario,
+            text="Tipo de servicio:",
+            bg="white",
+            font=("Arial", 10, "bold")
+        ).grid(row=0, column=0, sticky="w", pady=8)
+
+        self.tipo_servicio = ttk.Combobox(
+            formulario,
+            values=[
+                "Reserva de sala",
+                "Alquiler de equipo",
+                "Asesoría especializada"
+            ],
+            state="readonly",
+            width=30
+        )
+        self.tipo_servicio.grid(row=0, column=1, padx=10, pady=8)
+        self.tipo_servicio.current(0)
+        self.tipo_servicio.bind(
+            "<<ComboboxSelected>>",
+            self.actualizar_campos_servicio
+        )
+
+        self.campos_servicio = tk.Frame(formulario, bg="white")
+        self.campos_servicio.grid(
+            row=1, column=0, columnspan=2, sticky="w"
+        )
+
+        self.actualizar_campos_servicio()
+
+        tk.Button(
+            formulario,
+            text="Registrar servicio",
+            command=self.registrar_servicio,
+            bg="#1976D2",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            relief="flat",
+            cursor="hand2",
+            padx=15,
+            pady=8
+        ).grid(row=2, column=0, columnspan=2, pady=12)
+
+        tk.Label(
+            self.panel,
+            text="Servicios registrados",
+            font=("Arial", 15, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=8)
+
+        columnas = (
+            "identificacion",
+            "tipo",
+            "detalle",
+            "tarifa",
+            "disponibilidad"
+        )
+
+        self.tabla_servicios = ttk.Treeview(
+            self.panel,
+            columns=columnas,
+            show="headings",
+            height=9
+        )
+
+        titulos = [
+            ("identificacion", "Código"),
+            ("tipo", "Servicio"),
+            ("detalle", "Descripción"),
+            ("tarifa", "Tarifa por hora"),
+            ("disponibilidad", "Estado")
+        ]
+
+        for columna, titulo in titulos:
+            self.tabla_servicios.heading(columna, text=titulo)
+            self.tabla_servicios.column(columna, width=125)
+
+        self.tabla_servicios.pack(
+            fill="both", expand=True, padx=25, pady=10
+        )
+
+        for servicio in self.servicios:
+            self.agregar_servicio_tabla(servicio)
+
+    def actualizar_campos_servicio(self, evento=None):
+        for elemento in self.campos_servicio.winfo_children():
+            elemento.destroy()
+
+        self.entradas_servicio = {}
+
+        tipo = self.tipo_servicio.get()
+
+        campos = [
+            ("Identificación:", "identificacion"),
+            ("Tarifa por hora:", "tarifa")
+        ]
+
+        if tipo == "Reserva de sala":
+            campos.append(("Capacidad de personas:", "capacidad"))
+
+        elif tipo == "Alquiler de equipo":
+            campos.append(("Tipo de equipo:", "detalle"))
+
+        elif tipo == "Asesoría especializada":
+            campos.append(("Especialidad:", "detalle"))
+
+        for fila, (etiqueta, clave) in enumerate(campos):
+            tk.Label(
+                self.campos_servicio,
+                text=etiqueta,
+                bg="white",
+                font=("Arial", 10)
+            ).grid(row=fila, column=0, sticky="w", pady=5)
+
+            entrada = tk.Entry(
+                self.campos_servicio,
+                width=32,
+                font=("Arial", 10)
+            )
+            entrada.grid(row=fila, column=1, padx=10, pady=5)
+
+            self.entradas_servicio[clave] = entrada
+
+    def registrar_servicio(self):
+        try:
+            identificacion = self.entradas_servicio[
+                "identificacion"
+            ].get().strip()
+
+            tarifa = float(
+                self.entradas_servicio["tarifa"].get()
+            )
+
+            tipo = self.tipo_servicio.get()
+
+            if not identificacion:
+                messagebox.showwarning(
+                    "Dato incompleto",
+                    "Ingrese la identificación del servicio."
+                )
+                return
+
+            if any(
+                servicio.identificador == identificacion
+                for servicio in self.servicios
+            ):
+                messagebox.showwarning(
+                    "Código duplicado",
+                    "Ya existe un servicio con esa identificación."
+                )
+                return
+
+            if tipo == "Reserva de sala":
+                capacidad = int(
+                    self.entradas_servicio["capacidad"].get()
+                )
+
+                servicio = ReservaSala(
+                    identificacion, tarifa, capacidad
+                )
+                detalle = f"Capacidad: {capacidad} personas"
+
+            elif tipo == "Alquiler de equipo":
+                detalle = self.entradas_servicio["detalle"].get().strip()
+
+                servicio = AlquilerEquipo(
+                    identificacion, tarifa, detalle
+                )
+
+            else:
+                detalle = self.entradas_servicio["detalle"].get().strip()
+
+                servicio = AsesoriaEspecializada(
+                    identificacion, tarifa, detalle
+                )
+
+            self.servicios.append(servicio)
+            self.agregar_servicio_tabla(servicio)
+
+            registrar_evento(
+                f"Servicio {identificacion} registrado."
+            )
+
+            messagebox.showinfo(
+                "Registro exitoso",
+                "El servicio fue registrado correctamente."
+            )
+
+            self.mostrar_servicios()
+
+        except (ErrorSistema, ValueError) as error:
+            registrar_error(f"Error al registrar servicio: {error}")
+            messagebox.showerror(
+                "Error de registro",
+                str(error) if isinstance(error, ErrorSistema)
+                else "Revise la tarifa y los datos numéricos."
+            )
+
+        except Exception as error:
+            registrar_error(f"Error inesperado: {error}")
+            messagebox.showerror(
+                "Error",
+                "No fue posible registrar el servicio."
+            )
+
+    def agregar_servicio_tabla(self, servicio):
+
+        if isinstance(servicio, ReservaSala):
+            tipo = "Sala"
+            detalle = f"Capacidad: {servicio.capacidad}"
+
+        elif isinstance(servicio, AlquilerEquipo):
+            tipo = "Equipo"
+            detalle = servicio.tipo_equipo
+
+        else:
+            tipo = "Asesoría"
+            detalle = servicio.especialidad
+
+        tarifa = servicio._tarifa_hora
+
+        estado = (
+            "Disponible" if servicio.disponible
+            else "No disponible"
+        )
+
+        self.tabla_servicios.insert(
+            "",
+            "end",
+            values=(
+                servicio.identificador,
+                tipo,
+                detalle,
+                f"${tarifa:,.2f}",
+                estado
+            )
+        )
+    def mostrar_reservas(self):
+        self.limpiar_panel()
+
+        tk.Label(
+            self.panel,
+            text="Gestión de reservas",
+            font=("Arial", 22, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=15)
+
+        formulario = tk.Frame(self.panel, bg="white", padx=20, pady=15)
+        formulario.pack(fill="x", padx=25, pady=10)
+
+        tk.Label(formulario, text="Cliente:", bg="white").grid(row=0, column=0, sticky="w", pady=6)
+
+        self.cliente_reserva = ttk.Combobox(
+            formulario,
+            state="readonly",
+            width=35,
+            values=[f"{c.identificador} - {c.nombre}" for c in self.clientes]
+        )
+        self.cliente_reserva.grid(row=0, column=1, padx=10, pady=6)
+
+        tk.Label(formulario, text="Servicio:", bg="white").grid(row=1, column=0, sticky="w", pady=6)
+
+        self.servicio_reserva = ttk.Combobox(
+            formulario,
+            state="readonly",
+            width=35,
+            values=[f"{s.identificador} - {s.nombre}" for s in self.servicios]
+        )
+        self.servicio_reserva.grid(row=1, column=1, padx=10, pady=6)
+        self.servicio_reserva.bind(
+            "<<ComboboxSelected>>", self.actualizar_datos_reserva
+        )
+
+        tk.Label(formulario, text="Duración (horas):", bg="white").grid(row=2, column=0, sticky="w", pady=6)
+
+        self.duracion_reserva = tk.Entry(formulario, width=38)
+        self.duracion_reserva.grid(row=2, column=1, padx=10, pady=6)
+
+        self.datos_adicionales = tk.Frame(formulario, bg="white")
+        self.datos_adicionales.grid(row=3, column=0, columnspan=2, sticky="w")
+
+        self.entrada_adicional = None
+        self.actualizar_datos_reserva()
+
+        tk.Button(
+            formulario,
+            text="Registrar y confirmar reserva",
+            command=self.registrar_reserva,
+            bg="#1976D2",
+            fg="white",
+            font=("Arial", 10, "bold"),
+            relief="flat",
+            padx=15,
+            pady=8
+        ).grid(row=4, column=0, columnspan=2, pady=12)
+
+        tk.Label(
+            self.panel,
+            text="Reservas registradas",
+            font=("Arial", 15, "bold"),
+            bg="#F1F4F9",
+            fg="#172B4D"
+        ).pack(pady=8)
+
+        columnas = ("codigo", "cliente", "servicio", "duracion", "costo", "estado")
+
+        self.tabla_reservas = ttk.Treeview(
+            self.panel,
+            columns=columnas,
+            show="headings",
+            height=8
+        )
+
+        titulos = [
+            ("codigo", "Código"),
+            ("cliente", "Cliente"),
+            ("servicio", "Servicio"),
+            ("duracion", "Horas"),
+            ("costo", "Costo"),
+            ("estado", "Estado")
+        ]
+
+        for columna, titulo in titulos:
+            self.tabla_reservas.heading(columna, text=titulo)
+            self.tabla_reservas.column(columna, width=105)
+
+        self.tabla_reservas.pack(fill="both", expand=True, padx=25, pady=10)
+
+        for reserva in getattr(self, "reservas", []):
+            self.tabla_reservas.insert(
+                "",
+                "end",
+                values=(
+                    reserva.identificador,
+                    reserva.cliente.nombre,
+                    reserva.servicio.nombre,
+                    reserva.duracion,
+                    f"${reserva.costo:,.2f}",
+                    reserva.estado
+                )
+            )
+    def actualizar_datos_reserva(self, evento=None):
+        for elemento in self.datos_adicionales.winfo_children():
+            elemento.destroy()
+
+        self.entrada_adicional = None
+
+        if not self.servicios:
+            tk.Label(
+                self.datos_adicionales,
+                text="Primero debe registrar un servicio.",
+                bg="white"
+            ).grid(row=0, column=0, pady=5)
+            return
+
+        indice = self.servicio_reserva.current()
+
+        if indice < 0:
+            self.servicio_reserva.current(0)
+            indice = 0
+
+        servicio = self.servicios[indice]
+
+        if isinstance(servicio, ReservaSala):
+            etiqueta = "Cantidad de personas:"
+            self.tipo_adicional = "personas"
+
+        elif isinstance(servicio, AlquilerEquipo):
+            etiqueta = "Cantidad de equipos:"
+            self.tipo_adicional = "cantidad"
+
+        else:
+            etiqueta = "Modalidad:"
+            self.tipo_adicional = "modalidad"
+
+        tk.Label(
+            self.datos_adicionales,
+            text=etiqueta,
+            bg="white"
+        ).grid(row=0, column=0, sticky="w", pady=6)
+
+        if self.tipo_adicional == "modalidad":
+            self.entrada_adicional = ttk.Combobox(
+                self.datos_adicionales,
+                values=["virtual", "presencial"],
+                state="readonly",
+                width=35
+            )
+            self.entrada_adicional.current(0)
+        else:
+            self.entrada_adicional = tk.Entry(
+                self.datos_adicionales,
+                width=38
+            )
+
+        self.entrada_adicional.grid(row=0, column=1, padx=10, pady=6)
+
+    def registrar_reserva(self):
+        try:
+            if not self.clientes or not self.servicios:
+                messagebox.showwarning(
+                    "Datos incompletos",
+                    "Debe registrar al menos un cliente y un servicio."
+                )
+                return
+
+            indice_cliente = self.cliente_reserva.current()
+            indice_servicio = self.servicio_reserva.current()
+
+            if indice_cliente < 0 or indice_servicio < 0:
+                messagebox.showwarning(
+                    "Selección requerida",
+                    "Seleccione un cliente y un servicio."
+                )
+                return
+
+            cliente = self.clientes[indice_cliente]
+            servicio = self.servicios[indice_servicio]
+
+            duracion = float(self.duracion_reserva.get())
+
+            if duracion <= 0:
+                raise ValueError("La duración debe ser mayor que cero.")
+
+            valor_adicional = self.entrada_adicional.get().strip()
+
+            if not valor_adicional:
+                raise ValueError("Complete el dato adicional.")
+
+            if self.tipo_adicional == "personas":
+                parametros = {"personas": int(valor_adicional)}
+            elif self.tipo_adicional == "cantidad":
+                parametros = {"cantidad": int(valor_adicional)}
+            else:
+                parametros = {"modalidad": valor_adicional}
+
+            codigo = f"R{len(self.reservas) + 1:03d}"
+
+            reserva = Reserva(
+                codigo,
+                cliente,
+                servicio,
+                duracion,
+                **parametros
+            )
+
+            reserva.confirmar()
+
+            self.reservas.append(reserva)
+
+            registrar_evento(
+                f"Reserva {codigo} registrada correctamente."
+            )
+
+            messagebox.showinfo(
+                "Reserva confirmada",
+                f"La reserva se confirmó correctamente.\n"
+                f"Costo total: ${reserva.costo:,.2f}"
+            )
+
+            self.mostrar_reservas()
+
+        except (ValueError, ErrorSistema) as error:
+            registrar_error(f"Error al registrar reserva: {error}")
+            messagebox.showerror("Error de reserva", str(error))
+
+        except Exception as error:
+            registrar_error(f"Error inesperado en reserva: {error}")
+            messagebox.showerror(
+                "Error",
+                "No fue posible registrar la reserva. Revise los datos."
+            )
+
+
+    def salir(self):
+        if messagebox.askyesno(
+            "Salir",
+            "¿Desea cerrar Software FJ?"
+        ):
+            registrar_evento("Se cerró Software FJ.")
+            self.ventana.destroy()
+
+
+def iniciar_aplicacion():
+    ventana = tk.Tk()
+    AplicacionSoftwareFJ(ventana)
+    ventana.mainloop()
+
+
+if __name__ == "__main__":
+    iniciar_aplicacion()
