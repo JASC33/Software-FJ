@@ -1,33 +1,29 @@
-PROYECTO: SOFTWARE FJ
-Sistema Integral de Gestión de Clientes, Servicios y Reservas
-
-REQUISITOS
-- Python 3.9 o superior.
-- Visual Studio Code (recomendado).
-
-ARCHIVOS
-- main.py: ejecuta las diez operaciones de demostración.
-- entidad.py: clase abstracta general.
-- cliente.py: clase Cliente y validaciones.
-- servicio.py: clase abstracta Servicio y tres servicios especializados.
-- reserva.py: creación, procesamiento y cancelación de reservas.
-- excepciones.py: excepciones personalizadas.
-- logs.py: registro de eventos y errores.
-
-CÓMO EJECUTAR
-1. Extraiga la carpeta Software_FJ.
-2. Abra Visual Studio Code.
-3. Seleccione Archivo > Abrir carpeta y elija Software_FJ.
-4. Abra main.py.
-5. Abra la terminal en Visual Studio Code.
-6. Ejecute: python main.py
-   Si ese comando no funciona en Windows, pruebe: py main.py
-7. Revise la salida de la terminal y el archivo software_fj.log.
-
-NOTAS
-- El proyecto no utiliza bases de datos.
-- Los datos se manejan en objetos y listas durante la ejecución.
-- El archivo software_fj.log se crea automáticamente.
-- El método calcular_costo utiliza parámetros opcionales y una versión
-  sobrescrita para el alquiler de equipos, mostrando distintas variantes
-  de cálculo en Python.
+Software FJ
+Descripción
+Software FJ es un sistema desarrollado en Python que permite gestionar clientes, servicios y reservas mediante programación orientada a objetos.
+Funcionalidades
+Registro y gestión de clientes.
+Registro de servicios.
+Alquiler de equipos tecnológicos.
+Reserva de salas.
+Gestión de asesorías especializadas.
+Registro y confirmación de reservas.
+Validación de datos y manejo de excepciones.
+Registro de eventos y errores mediante archivos de log.
+Interfaz gráfica desarrollada con Tkinter.
+Requisitos
+Python 3.
+Biblioteca Tkinter (incluida normalmente con Python).
+Ejecución del programa
+Para iniciar la interfaz gráfica, abrir una terminal en la carpeta del proyecto y ejecutar:
+python interfaz.py
+Para ejecutar las pruebas principales desde consola:
+python main.py
+Tecnologías utilizadas
+Python.
+Programación orientada a objetos.
+Tkinter.
+Manejo de excepciones.
+Registro de eventos y errores.
+Autor
+Proyecto académico desarrollado para la Universidad Nacional Abierta y a Distancia (UNAD).
